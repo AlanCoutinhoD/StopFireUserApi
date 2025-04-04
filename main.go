@@ -34,12 +34,7 @@ func main() {
 
 	router.Use(cors.New(config))
 
-	// Add a simple root route to check if the server is running
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "API is running",
-		})
-	})
+
 
 	// Inicializar infraestructura de usuarios
 	userInfrastructure.Init(router)
