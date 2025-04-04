@@ -6,13 +6,21 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"hex_go/src/users/infrastructure"
+	"hex_go/src/config"
+	"hex_go/src/esp32/infrastructure"
+	userInfrastructure "hex_go/src/users/infrastructure"
 )
 
 func main() {
 	// Cargar variables de entorno
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
+	}
+
+	// Inicializar base de datos
+	db, err := config.InitDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
 	router := gin.Default()
@@ -34,7 +42,10 @@ func main() {
 	})
 
 	// Inicializar infraestructura de usuarios
-	infrastructure.Init(router)
+	userInfrastructure.Init(router)
+
+	// Inicializar infraestructura de ESP32
+	infrastructure.Init(router, db)
 
 	// Iniciar el servidor
 	log.Println("Server running on port 8080")
