@@ -41,21 +41,34 @@ func Init(router *gin.Engine, db *sql.DB) {
 
 // createESP32Table crea la tabla de ESP32 si no existe
 func createESP32Table(db *sql.DB) {
+	// First check if the table exists
+	var tableName string
+	err := db.QueryRow("SHOW TABLES LIKE 'esp32'").Scan(&tableName)
+	if err == nil {
+		// Table already exists, no need to create it
+		log.Println("ESP32 table already exists, skipping creation")
+		return
+	}
+
+	// Table doesn't exist, create it
 	query := `
 		CREATE TABLE IF NOT EXISTS esp32 (
 			idESP32 INT AUTO_INCREMENT PRIMARY KEY,
-			idKY_026 INT NOT NULL,
-			idMQ_2 INT NOT NULL,
-			idMQ_135 INT NOT NULL,
-			idDHT_22 INT NOT NULL,
+			idKY_026 INT,
+			idMQ_2 INT,
+			idMQ_135 INT,
+			idDHT_22 INT,
 			numero_serie VARCHAR(255) NOT NULL UNIQUE,
 			idUser INT,
 			FOREIGN KEY (idUser) REFERENCES users(id) ON DELETE SET NULL
 		)
 	`
 	
-	_, err := db.Exec(query)
+	_, err = db.Exec(query)
 	if err != nil {
-		log.Fatalf("Failed to create ESP32 table: %v", err)
+		log.Printf("Warning: Failed to create ESP32 table: %v", err)
+		// Don't fatally exit, just log the warning
+	} else {
+		log.Println("ESP32 table created successfully")
 	}
 }
