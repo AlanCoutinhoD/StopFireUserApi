@@ -6,8 +6,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"hex_go/src/alerts/infrastructure"
 	"hex_go/src/config"
-	"hex_go/src/esp32/infrastructure"
+	esp32Infrastructure "hex_go/src/esp32/infrastructure"
 	userInfrastructure "hex_go/src/users/infrastructure"
 )
 
@@ -34,12 +35,20 @@ func main() {
 
 	router.Use(cors.New(config))
 
-
+	// Add a simple root route to check if the server is running
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "API is running",
+		})
+	})
 
 	// Inicializar infraestructura de usuarios
 	userInfrastructure.Init(router)
 
 	// Inicializar infraestructura de ESP32
+	esp32Infrastructure.Init(router, db)
+
+	// Inicializar infraestructura de alertas
 	infrastructure.Init(router, db)
 
 	// Iniciar el servidor
